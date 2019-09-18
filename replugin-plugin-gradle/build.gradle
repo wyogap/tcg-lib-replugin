@@ -24,15 +24,18 @@ apply plugin: 'maven-publish'
 repositories {
     jcenter()
     mavenCentral()
+    google()
 }
 
 buildscript {
     repositories {
         jcenter()
         mavenCentral()
+        google()
     }
     dependencies {
 //        classpath 'com.android.tools.build:gradle:2.1.0'
+//        classpath 'com.android.tools.build:gradle:3.3.2'
         // 将项目发布到JCenter 所需要的jar   添加依赖
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0'
         classpath 'com.github.dcendents:android-maven-plugin:1.2'
@@ -57,7 +60,8 @@ sourceSets {
 }
 
 dependencies {
-    compile 'com.android.tools.build:gradle:2.1.3'
+    //compile 'com.android.tools.build:gradle:2.1.3'
+    compile 'com.android.tools.build:gradle:3.3.2'
     compile 'org.json:json:20160212'
     compile 'org.codehaus.groovy:groovy:2.4.7'
     compile 'com.squareup:javapoet:1.5.1'
@@ -88,7 +92,7 @@ if (project.hasProperty("android")) { // Android libraries
     }
 }
 
-// 强制 Java/JavaDoc 等的编码为 UTF-8
+// Force the encoding of Java/JavaDoc, etc. to UTF-8
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 }
@@ -97,8 +101,6 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }
-
-
 
 // add javadoc/source jar tasks as artifacts
 artifacts {

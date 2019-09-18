@@ -59,37 +59,48 @@ public class LocalBroadcastInjector extends BaseInjector {
             FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 
                 String filePath = file.toString()
-                editor.filePath = filePath
+                String relativeFilePath = filePath.replace(dir, "")
+                editor.filePath = relativeFilePath
 
                 def stream, ctCls
                 try {
-                    // 不处理 LocalBroadcastManager.class
-                    if (filePath.contains('android/support/v4/content/LocalBroadcastManager')) {
-                        println "Ignore ${filePath}"
+                    // Not processed: LocalBroadcastManager.class
+                    if (filePath.contains('androidx/localbroadcastmanager/content/LocalBroadcastManager')) {
+                        println "    Ignore ${relativeFilePath}"
                         return super.visitFile(file, attrs)
                     }
 
+                    if (!filePath.endsWith('.class')) {
+                        println "    Ignore ${relativeFilePath}"
+                        return super.visitFile(file, attrs)
+                    }
+
+                    //println "makeClass()"
                     stream = new FileInputStream(filePath)
                     ctCls = pool.makeClass(stream);
 
-                    // println ctCls.name
+                    //println ctCls.name
+                    //println "defrost()"
                     if (ctCls.isFrozen()) {
                         ctCls.defrost()
                     }
 
-                    /* 检查方法列表 */
+                    /* Check method list */
+                    //println "getDeclaredMethods()"
                     ctCls.getDeclaredMethods().each {
                         it.instrument(editor)
                     }
 
+                    //println "getMethods()"
                     ctCls.getMethods().each {
                         it.instrument(editor)
                     }
 
+                    //println "writeFile()"
                     ctCls.writeFile(dir)
                 } catch (Throwable t) {
-                    println "    [Warning] --> ${t.toString()}"
-                    // t.printStackTrace()
+                    println "    [LocalBroadcastInjector:Warning] --> ${t.toString()}"
+                    //t.printStackTrace()
                 } finally {
                     if (ctCls != null) {
                         ctCls.detach()

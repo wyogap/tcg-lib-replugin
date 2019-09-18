@@ -22,6 +22,7 @@ apply plugin: 'maven-publish'
 repositories {
     jcenter()
     mavenCentral()
+    google()
     maven() { url 'https://maven.google.com' }
 }
 
@@ -29,6 +30,7 @@ buildscript {
     repositories {
         jcenter()
         mavenCentral()
+        google()
     }
 
     dependencies {
@@ -38,9 +40,9 @@ buildscript {
 }
 
 dependencies {
-    compile 'com.android.tools.build:gradle:2.1.3' // >= 2.14.1
+//    compile 'com.android.tools.build:gradle:2.1.3' // >= 2.14.1
 //    compile 'com.android.tools.build:gradle:2.3.3' // gradle 3.3 <= {} < gradle-4.10
-//    compile 'com.android.tools.build:gradle:3.3.2' // >= gradle-4.10
+    compile 'com.android.tools.build:gradle:3.3.2' // >= gradle-4.10
 //    compile 'com.android.tools.build:gradle:3.4.1' // >= gradle-5.1.1
     compile 'org.json:json:20160212'
     compile 'org.codehaus.groovy:groovy:2.4.7'
@@ -51,6 +53,40 @@ dependencies {
 
     compile 'com.google.gradle:osdetector-gradle-plugin:1.2.1'
     compile 'net.dongliu:apk-parser:2.2.0'
+}
+
+// 强制 Java/JavaDoc 等的编码为 UTF-8
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+// add javadoc/source jar tasks as artifacts
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            if (plugins.hasPlugin('war')) {
+                from components.web
+            } else {
+                from components.java
+            }
+
+            artifact sourcesJar
+        }
+    }
 }
 
 project.ext.RP_ARTIFACT_ID = 'replugin-host-gradle'

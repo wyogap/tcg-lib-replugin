@@ -131,6 +131,11 @@ if ( pbBintayKey == null ){
 
     ///// publish to LOCAL
 
+	System.err.println("\n>>>file://${System.getenv('HOME')}/.m2/repository")
+	//System.err.println(">>>Group:${group}")
+	//System.err.println(">>>Artifact:${pbArtifactId}")
+	//System.err.println(">>>Version:${version}")
+
     apply plugin: 'maven'
     final def theGroup = group // group will be reset to 'upload'
     uploadArchives {

@@ -43,8 +43,8 @@ public class LoaderActivityInjector extends BaseInjector {
             'android.app.TabActivity'                 : 'com.qihoo360.replugin.loader.a.PluginTabActivity',
             'android.app.ListActivity'                : 'com.qihoo360.replugin.loader.a.PluginListActivity',
             'android.app.ActivityGroup'               : 'com.qihoo360.replugin.loader.a.PluginActivityGroup',
-            'android.support.v4.app.FragmentActivity' : 'com.qihoo360.replugin.loader.a.PluginFragmentActivity',
-            'android.support.v7.app.AppCompatActivity': 'com.qihoo360.replugin.loader.a.PluginAppCompatActivity',
+            'androidx.fragment.app.FragmentActivity'  : 'com.qihoo360.replugin.loader.a.PluginFragmentActivity',
+            'androidx.appcompat.app.AppCompatActivity': 'com.qihoo360.replugin.loader.a.PluginAppCompatActivity',
             'android.preference.PreferenceActivity'   : 'com.qihoo360.replugin.loader.a.PluginPreferenceActivity',
             'android.app.ExpandableListActivity'      : 'com.qihoo360.replugin.loader.a.PluginExpandableListActivity'
     ]
@@ -53,10 +53,10 @@ public class LoaderActivityInjector extends BaseInjector {
     def injectClass(ClassPool pool, String dir, Map config) {
         init()
 
-        /* 遍历程序中声明的所有 Activity */
-        //每次都new一下，否则多个variant一起构建时只会获取到首个manifest
+        /* Traverse all the activities declared in the program */
+        //New every time, otherwise multiple variants will only get the first manifest when they are built together.
         new ManifestAPI().getActivities(project, variantDir).each {
-            // 处理没有被忽略的 Activity
+            // Processing only not-ignored Activity
             if (!(it in CommonData.ignoredActivities)) {
                 handleActivity(pool, it, dir)
             }
@@ -96,21 +96,21 @@ public class LoaderActivityInjector extends BaseInjector {
             /* 从当前 Activity 往上回溯，直到找到需要替换的 Activity */
             def superCls = originSuperCls
             while (superCls != null && !(superCls.name in loaderActivityRules.keySet())) {
-                // println ">>> 向上查找 $superCls.name"
+                println ">>> Lookup $superCls.name"
                 ctCls = superCls
                 superCls = ctCls.superclass
             }
 
             // 如果 ctCls 已经是 LoaderActivity，则不修改
             if (ctCls.name in loaderActivityRules.values()) {
-                // println "    跳过 ${ctCls.getName()}"
+                println "    Jump over ${ctCls.getName()}"
                 return
             }
 
             /* 找到需要替换的 Activity, 修改 Activity 的父类为 LoaderActivity */
             if (superCls != null) {
                 def targetSuperClsName = loaderActivityRules.get(superCls.name)
-                // println "    ${ctCls.getName()} 的父类 $superCls.name 需要替换为 ${targetSuperClsName}"
+                println "    ${ctCls.getName()} Parent class $superCls.name will be replaced with ${targetSuperClsName}"
                 CtClass targetSuperCls = pool.get(targetSuperClsName)
 
                 if (ctCls.isFrozen()) {
@@ -139,7 +139,7 @@ public class LoaderActivityInjector extends BaseInjector {
             }
 
         } catch (Throwable t) {
-            println "    [Warning] --> ${t.toString()}"
+            println "    [LoaderActivityInjector:Warning] --> ${t.toString()}"
         } finally {
             if (ctCls != null) {
                 ctCls.detach()

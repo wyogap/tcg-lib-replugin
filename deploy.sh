@@ -57,8 +57,10 @@ rp_test(){
 	local current=`pwd`
 	for p in ${projects}; do
 		local p=${RP_BASE_DIR}/${p}
-		echo -e ">>> BUILDING ${RP_BASE_DIR}/${p}"
-		cd ${p} && { __gradle_exec -p ${p} clean asDebug  }
+		echo -e '>>> BUILDING ${RP_BASE_DIR}/${p}'
+		#cd ${p} && { __gradle_exec -p ${p} clean asDebug  }
+		cd ${p}
+		__gradle_exec -p ${p} clean asDebug
 		ls -l ${p}/app/build/outputs/apk
 	done
 	cd ${current}

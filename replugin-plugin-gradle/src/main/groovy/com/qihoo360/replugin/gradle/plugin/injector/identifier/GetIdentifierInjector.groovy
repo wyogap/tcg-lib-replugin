@@ -48,8 +48,14 @@ public class GetIdentifierInjector extends BaseInjector {
 
                 //todo only .class
                 String filePath = file.toString()
+                String relativeFilePath = filePath.replace(dir, "")
 
-                editor.filePath = filePath
+                editor.filePath = relativeFilePath
+
+                if (!filePath.endsWith('.class')) {
+                    println "    Ignore ${relativeFilePath}"
+                    return super.visitFile(file, attrs)
+                }
 
                 def stream, ctCls
                 try {
@@ -71,7 +77,7 @@ public class GetIdentifierInjector extends BaseInjector {
 
                     ctCls.writeFile(dir)
                 } catch (Throwable t) {
-                    println "    [Warning] --> ${t.toString()}"
+                    println "    [GetIdentifierInjector:Warning] --> ${t.toString()}"
                 } finally {
                     if (ctCls != null) {
                         ctCls.detach()

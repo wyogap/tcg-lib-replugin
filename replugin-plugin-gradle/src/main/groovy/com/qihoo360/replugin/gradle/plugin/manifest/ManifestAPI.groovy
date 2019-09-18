@@ -61,11 +61,11 @@ public class ManifestAPI {
             //instant run的manifest
             File instantRunManifestOutputFile = null
             try {
-                manifestOutputFile = processManifestTask.getManifestOutputFile()
-                instantRunManifestOutputFile = processManifestTask.getInstantRunManifestOutputFile()
+                manifestOutputFile = processManifestTask.getManifestOutputFile().asFile.get();
+                instantRunManifestOutputFile = processManifestTask.getInstantRunManifestOutputFile().asFile.get()
             } catch (Exception e) {
-                manifestOutputFile = new File(processManifestTask.getManifestOutputDirectory(), "AndroidManifest.xml")
-                instantRunManifestOutputFile = new File(processManifestTask.getInstantRunManifestOutputDirectory(), "AndroidManifest.xml")
+                manifestOutputFile = new File(processManifestTask.getManifestOutputDirectory().asFile.get(), "AndroidManifest.xml")
+                instantRunManifestOutputFile = new File(processManifestTask.getInstantRunManifestOutputDirectory().asFile.get(), "AndroidManifest.xml")
             }
 
             if (manifestOutputFile == null && instantRunManifestOutputFile == null) {
@@ -73,8 +73,8 @@ public class ManifestAPI {
             }
 
             //打印
-            println " manifestOutputFile:${manifestOutputFile} ${manifestOutputFile.exists()}"
-            println " instantRunManifestOutputFile:${instantRunManifestOutputFile} ${instantRunManifestOutputFile.exists()}"
+            println "    manifestOutputFile:${manifestOutputFile} ${manifestOutputFile.exists()}"
+            println "    instantRunManifestOutputFile:${instantRunManifestOutputFile} ${instantRunManifestOutputFile.exists()}"
 
             //先设置为正常的manifest
             result = manifestOutputFile
@@ -84,7 +84,7 @@ public class ManifestAPI {
                 def instantRunTask = project.tasks.getByName("transformClassesWithInstantRunFor${variantName}")
                 //查找instant run是否存在且文件存在
                 if (instantRunTask && instantRunManifestOutputFile.exists()) {
-                    println ' Instant run is enabled and the manifest is exist.'
+                    println '    Instant run is enabled and the manifest is exist.'
                     if (!manifestOutputFile.exists()) {
                         //因为这里只是为了读取activity，所以无论用哪个manifest差别不大
                         //正常情况下不建议用instant run的manifest，除非正常的manifest不存在
@@ -98,10 +98,10 @@ public class ManifestAPI {
 
             //最后检测文件是否存在，打印
             if (!result.exists()) {
-                println ' AndroidManifest.xml not exist'
+                println '    AndroidManifest.xml not exist'
             }
             //输出路径
-            println " AndroidManifest.xml 路径：$result"
+            println "    AndroidManifest.xml Path: $result"
 
             return result.absolutePath
         }

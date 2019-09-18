@@ -72,11 +72,17 @@ public class ProviderInjector extends BaseInjector {
             FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 
                 String filePath = file.toString()
+                String relativeFilePath = filePath.replace(dir, "")
                 def stream, ctCls
 
                 try {
                     if (filePath.contains('PluginProviderClient.class')) {
                         throw new Exception('can not replace self ')
+                    }
+
+                    if (!filePath.endsWith('.class')) {
+                        println "    Ignore ${relativeFilePath}"
+                        return super.visitFile(file, attrs)
                     }
 
                     stream = new FileInputStream(filePath)
@@ -87,7 +93,7 @@ public class ProviderInjector extends BaseInjector {
                         ctCls.defrost()
                     }
 
-                    editor.filePath = filePath
+                    editor.filePath = relativeFilePath
 
                     (ctCls.getDeclaredMethods() + ctCls.getMethods()).each {
                         it.instrument(editor)
@@ -95,8 +101,8 @@ public class ProviderInjector extends BaseInjector {
 
                     ctCls.writeFile(dir)
                 } catch (Throwable t) {
-                    println "    [Warning] --> ${t.toString()}"
-                    // t.printStackTrace()
+                    println "    [ProviderInjector:Warning] --> ${t.toString()}"
+                    //t.printStackTrace()
                 } finally {
                     if (ctCls != null) {
                         ctCls.detach()
@@ -109,5 +115,7 @@ public class ProviderInjector extends BaseInjector {
                 return super.visitFile(file, attrs)
             }
         })
+
+        //Util.newSection()
     }
 }

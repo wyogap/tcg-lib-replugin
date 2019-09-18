@@ -15,13 +15,16 @@
  */
 
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
+apply plugin: 'digital.wup.android-maven-publish'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
-        minSdkVersion 1
+        minSdkVersion 15
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         consumerProguardFiles 'replugin-library-rules.pro'
@@ -40,9 +43,26 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    provided 'com.android.support:appcompat-v7:23.4.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    //provided 'com.android.support:appcompat-v7:23.4.0'
+    compileOnly 'androidx.appcompat:appcompat:1.0.0'
+}
+
+// Force the encoding of Java/JavaDoc, etc. to UTF-8
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+publishing {
+    publications {
+        mavenAar(MavenPublication) {
+            from components.android
+        }
+    }
 }
 
 project.ext.RP_ARTIFACT_ID = 'replugin-plugin-lib'
 apply from: '../../rp-publish.gradle'
+
+

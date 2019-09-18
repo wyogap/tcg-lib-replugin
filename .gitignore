@@ -230,3 +230,4 @@ Temporary Items
 # --------
 # Project-level settings
 /.tgitconfig
+.svn

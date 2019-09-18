@@ -65,7 +65,7 @@ public class ReClassTransform extends Transform {
 
         welcome()
 
-        /* 读取用户配置 */
+        /* Read user configuration */
         def config = project.extensions.getByName('repluginPluginConfig')
 
 
@@ -73,7 +73,7 @@ public class ReClassTransform extends Transform {
         try {
             rootLocation = outputProvider.rootLocation
         } catch (Throwable e) {
-            //android gradle plugin 3.0.0+ 修改了私有变量，将其移动到了IntermediateFolderUtils中去
+            //android gradle plugin 3.0.0+ modified the private variable and moved it to IntermediateFolderUtils
             rootLocation = outputProvider.folderUtils.getRootFolder()
         }
         if (rootLocation == null) {
@@ -127,8 +127,8 @@ public class ReClassTransform extends Transform {
         Util.newSection()
         Injectors.values().each {
             if (it.nickName in injectors) {
-                println ">>> Do: ${it.nickName}"
-                // 将 NickName 的第 0 个字符转换成小写，用作对应配置的名称
+                println ">>>\n>>> Do: ${it.nickName}"
+                // Convert the 0th character of NickName to lowercase, used as the name of the corresponding configuration
                 def configPre = Util.lowerCaseAtIndex(it.nickName, 0)
                 doInject(inputs, pool, it.injector, config.properties["${configPre}Config"])
             } else {
@@ -181,7 +181,12 @@ public class ReClassTransform extends Transform {
             Util.zipDir(dirAfterUnzip, JarAfterzip)
 
             // println ">>> 删除目录 $dirAfterUnzip"
-            FileUtils.deleteDirectory(new File(dirAfterUnzip))
+            try {
+                FileUtils.deleteDirectory(new File(dirAfterUnzip))
+            } catch (Throwable t) {
+                println t.toString()
+                t.printStackTrace()
+            }
         }
     }
 
@@ -224,6 +229,7 @@ public class ReClassTransform extends Transform {
     def handleJar(ClassPool pool, JarInput input, IClassInjector injector, Object config) {
         File jar = input.file
         if (jar.absolutePath in includeJars) {
+            Util.newSection()
             println ">>> Handle Jar: ${jar.absolutePath}"
             String dirAfterUnzip = map.get(jar.getParent() + File.separatorChar + jar.getName()).replace('.jar', '')
             injector.injectClass(pool, dirAfterUnzip, config)
@@ -264,6 +270,7 @@ public class ReClassTransform extends Transform {
      * 处理目录中的 class 文件
      */
     def handleDir(ClassPool pool, DirectoryInput input, IClassInjector injector, Object config) {
+        Util.newSection()
         println ">>> Handle Dir: ${input.file.absolutePath}"
         injector.injectClass(pool, input.file.absolutePath, config)
     }

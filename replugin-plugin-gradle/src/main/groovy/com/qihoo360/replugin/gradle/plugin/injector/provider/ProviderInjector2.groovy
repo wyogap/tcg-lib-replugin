@@ -58,6 +58,7 @@ public class ProviderInjector2 extends BaseInjector {
             FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 
                 String filePath = file.toString()
+                String relativeFilePath = filePath.replace(dir, "")
                 def stream, ctCls
 
                 try {
@@ -65,15 +66,21 @@ public class ProviderInjector2 extends BaseInjector {
                         throw new Exception('can not replace self ')
                     }
 
+                    if (!filePath.endsWith('.class')) {
+                        println "    Ignore ${relativeFilePath}"
+                        return super.visitFile(file, attrs)
+                    }
+
+                    //println filePath
                     stream = new FileInputStream(filePath)
                     ctCls = pool.makeClass(stream);
 
-                    // println ctCls.name
+                    //println ctCls.name
                     if (ctCls.isFrozen()) {
                         ctCls.defrost()
                     }
 
-                    editor.filePath = filePath
+                    editor.filePath = relativeFilePath
                     ctCls.getDeclaredMethods().each {
                         it.instrument(editor)
                     }
@@ -84,8 +91,8 @@ public class ProviderInjector2 extends BaseInjector {
 
                     ctCls.writeFile(dir)
                 } catch (Throwable t) {
-                    println "    [Warning] --> ${t.toString()}"
-                    // t.printStackTrace()
+                    println "    [ProviderInjector2:Warning] --> ${t.toString()}"
+                    //t.printStackTrace()
                 } finally {
                     if (ctCls != null) {
                         ctCls.detach()
